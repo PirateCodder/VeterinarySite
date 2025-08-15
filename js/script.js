@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const indicators = document.querySelectorAll('.indicator');
     const prevButton = document.querySelector('.slider-btn-prev');
     const nextButton = document.querySelector('.slider-btn-next');
-    const totalSlides = 6;
+    const totalSlides = 4;
     let currentSlide = 0;
     let slideInterval;
     let isTransitioning = false;
@@ -16,8 +16,8 @@ document.addEventListener('DOMContentLoaded', function() {
         if (isTransitioning) return;
         isTransitioning = true;
 
-        // Transform değerini hesapla (her slide %16.6667)
-        const translateX = -(currentSlide * 16.6667);
+        // Transform değerini hesapla (her slide %25)
+        const translateX = -(currentSlide * 25);
         sliderContainer.style.transform = `translateX(${translateX}%)`;
 
         // Indicator'ları güncelle
@@ -142,16 +142,17 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // ===== SCROLL ANİMASYONLARI =====
+// ===== SCROLL ANİMASYONLARI =====
     const observerOptions = {
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px'
+        threshold: 0.15,
+        rootMargin: '0px 0px -30px 0px'
     };
 
     const observer = new IntersectionObserver(function(entries) {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
                 entry.target.classList.add('animated');
+                observer.unobserve(entry.target); // Performance: tek seferlik animasyon
             }
         });
     }, observerOptions);
@@ -159,18 +160,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Scroll animasyonu için elementleri seç
     const animateElements = document.querySelectorAll('.animate-on-scroll');
     animateElements.forEach(el => observer.observe(el));
-
-    // ===== PARALLAX EFEKTİ =====
-    window.addEventListener('scroll', function() {
-        const scrolled = window.pageYOffset;
-        const parallaxElements = document.querySelectorAll('.parallax-element');
-        
-        parallaxElements.forEach(element => {
-            const speed = element.dataset.speed || 0.5;
-            const yPos = -(scrolled * speed);
-            element.style.transform = `translateY(${yPos}px)`;
-        });
-    });
 
     // ===== SMOOTH SCROLL =====
     const smoothScrollLinks = document.querySelectorAll('a[href^="#"]');
@@ -206,91 +195,37 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // ===== HEADER SCROLL EFEKTİ =====
+    // ===== HEADER SCROLL EFEKTİ (OPTİMİZE EDİLMİŞ) =====
     const header = document.querySelector('header');
-    const topBar = document.querySelector('.top-bar');
-    let lastScrollTop = 0;
+    let ticking = false;
 
-    window.addEventListener('scroll', function() {
+    function updateHeader() {
         const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
         
         if (scrollTop > 100) {
             header.classList.add('scrolled');
-            if (topBar) {
-                topBar.style.transform = 'translateY(-100%)';
-            }
         } else {
             header.classList.remove('scrolled');
-            if (topBar) {
-                topBar.style.transform = 'translateY(0)';
-            }
         }
-        
-        lastScrollTop = scrollTop;
-    });
+        ticking = false;
+    }
+
+    function requestTick() {
+        if (!ticking) {
+            requestAnimationFrame(updateHeader);
+            ticking = true;
+        }
+    }
+
+    window.addEventListener('scroll', requestTick, { passive: true });
 
     // ===== YÜKLEME ANİMASYONLARI =====
     setTimeout(function() {
         document.body.classList.add('loaded');
     }, 100);
 
-    // ===== KARTLARA HOVER EFEKTİ =====
-    const cards = document.querySelectorAll('.kart, .iletisim-kart, .ulasim-kart');
-    cards.forEach(card => {
-        card.addEventListener('mouseenter', function() {
-            this.style.transform = 'translateY(-10px) scale(1.02)';
-        });
-        
-        card.addEventListener('mouseleave', function() {
-            this.style.transform = '';
-        });
-    });
-
-    // ===== ACİL BUTON ÖZEL EFEKTLERİ =====
-    const acilButtons = document.querySelectorAll('.acil-buton, .mega-acil-buton');
-    acilButtons.forEach(button => {
-        // Hover efekti
-        button.addEventListener('mouseenter', function() {
-            const icon = this.querySelector('.icon');
-            if (icon) {
-                icon.style.animation = 'bounce 0.6s ease-in-out';
-            }
-        });
-        
-        button.addEventListener('mouseleave', function() {
-            const icon = this.querySelector('.icon');
-            if (icon) {
-                icon.style.animation = '';
-            }
-        });
-        
-        // Tıklama efekti
-        button.addEventListener('click', function() {
-            this.style.transform = 'scale(0.98)';
-            setTimeout(() => {
-                this.style.transform = '';
-            }, 100);
-        });
-    });
-
-    // ===== LOGO ANİMASYONU =====
-    const logo = document.querySelector('.logo');
-    if (logo) {
-        let clickCount = 0;
-        logo.addEventListener('click', function(e) {
-            e.preventDefault();
-            clickCount++;
-            
-            if (clickCount >= 5) {
-                // Easter egg: 5 kere tıklanırsa özel animasyon
-                this.style.animation = 'wiggle 1s ease-in-out';
-                setTimeout(() => {
-                    this.style.animation = '';
-                    clickCount = 0;
-                }, 1000);
-            }
-        });
-    }
+    // ===== BASIT HOVER EFEKTLERİ (CSS'DE HALLEDİLDİ) =====
+    // Hover efektleri CSS'de daha performanslı
 
     // ===== HARİTA İNTERAKTİVİTESİ =====
     const mapContainer = document.querySelector('.harita-container');
@@ -337,85 +272,13 @@ document.addEventListener('DOMContentLoaded', function() {
         element.classList.remove('loading');
     }
 
-    // ===== TOAST BİLDİRİMLERİ =====
-    function showToast(message, type = 'success') {
-        const toast = document.createElement('div');
-        toast.className = `toast toast-${type}`;
-        toast.textContent = message;
-        toast.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: ${type === 'success' ? 'var(--accent-color)' : 'var(--warning-color)'};
-            color: white;
-            padding: 1rem 2rem;
-            border-radius: 10px;
-            z-index: 1000;
-            transform: translateX(100%);
-            transition: transform 0.3s ease;
-        `;
-        
-        document.body.appendChild(toast);
-        
-        setTimeout(() => {
-            toast.style.transform = 'translateX(0)';
-        }, 100);
-        
-        setTimeout(() => {
-            toast.style.transform = 'translateX(100%)';
-            setTimeout(() => {
-                document.body.removeChild(toast);
-            }, 300);
-        }, 3000);
-    }
-
-    // ===== LİNK TIKLAMALARı =====
-    const externalLinks = document.querySelectorAll('a[target="_blank"]');
-    externalLinks.forEach(link => {
-        link.addEventListener('click', function() {
-            showToast('Yol tarifi için yeni sekme açılıyor...', 'success');
-        });
-    });
-
-    // ===== BAŞLANGıÇ MESAJI =====
-    console.log(`
-    🐾 VetSim Veteriner Kliniği 🐾
-    
-    ✨ İnteraktif özellikler aktif!
-    🏥 Patili dostlarınızın sağlığı bizim önceliğimiz!
-    📞 7/24 Acil Destek: 0507 008 20 70
-    📍 İzmir Karşıyaka - 24 Saat Açık
-    
-    🎨 Özel animasyonlar ve hover efektleri
-    ⌨️  Kısayollar: Ctrl+T (Acil Arama), ESC (Harita kapat)
-    🖱️  Logo'ya 5 kere tıklayın! (Easter egg)
-    
-    👩🏻‍⚕️ Veteriner Hekim Elif Simge TAŞKÖPRÜ
-    💝 Sevgi İyileştirir
-    `);
-
-    // Hoş geldin animasyonu
-    setTimeout(() => {
-        showToast('🐾 VetSim Veteriner Kliniği\'ne Hoş Geldiniz!', 'success');
-    }, 1000);
+    // ===== PRODUCTION İÇİN TEMİZLENDİ =====
+    console.log('🐾 VetSim Veteriner Kliniği - Website loaded successfully!');
 });
 
-// ===== YARDIMCI FONKSİYONLAR =====
+// ===== YARDIMCI FONKSİYONLAR (OPTİMİZE EDİLMİŞ) =====
 
-// Debounce fonksiyonu
-function debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-        const later = () => {
-            clearTimeout(timeout);
-            func(...args);
-        };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-    };
-}
-
-// Throttle fonksiyonu
+// Sadece kullanılan throttle fonksiyonu
 function throttle(func, limit) {
     let inThrottle;
     return function() {
@@ -428,10 +291,3 @@ function throttle(func, limit) {
         }
     }
 }
-
-// Performans için scroll handler'ı optimize et
-const optimizedScrollHandler = throttle(function() {
-    // Scroll bazlı animasyonlar için optimize edilmiş handler
-}, 16); // ~60fps
-
-window.addEventListener('scroll', optimizedScrollHandler);
