@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // ===== MODERN HORIZONTAL SLIDER =====
     const sliderContainer = document.querySelector('.slider-container');
-    const indicators = document.querySelectorAll('.indicator');
+    const indicators = document.querySelectorAll('.slider-indicator');
     const prevButton = document.querySelector('.slider-btn-prev');
     const nextButton = document.querySelector('.slider-btn-next');
     const totalSlides = 4;
@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function startSlider() {
-        slideInterval = setInterval(nextSlide, 5000);
+        slideInterval = setInterval(nextSlide, 10000);
     }
 
     function stopSlider() {
@@ -228,7 +228,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Hover efektleri CSS'de daha performanslı
 
     // ===== HARİTA İNTERAKTİVİTESİ =====
-    const mapContainer = document.querySelector('.harita-container');
+    const mapContainer = document.querySelector('.map-container');
     if (mapContainer) {
         const iframe = mapContainer.querySelector('iframe');
         
@@ -247,7 +247,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.addEventListener('keydown', function(e) {
         // Escape tuşu ile haritayı kapat
         if (e.key === 'Escape') {
-            const iframe = document.querySelector('.harita-container iframe');
+            const iframe = document.querySelector('.map-container iframe');
             if (iframe) {
                 iframe.style.pointerEvents = 'none';
             }
