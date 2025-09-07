@@ -751,7 +751,7 @@ a {
 }
 
 .hero-btn i {
-    font-size: 1.25rem;
+    font-size: 1.6rem;
 }
 
 .hero-btn.secondary {
@@ -776,6 +776,44 @@ a {
     background: rgba(255, 255, 255, 0.25);
     transform: translateY(-3px);
     color: var(--white);
+}
+
+.hero-btn.instagram {
+    background: linear-gradient(45deg, #833ab4, #c13584, #e1306c, #fd1d1d);
+    color: var(--white);
+    box-shadow: 0 10px 15px -3px rgba(193, 53, 132, 0.3), 0 4px 6px -2px rgba(193, 53, 132, 0.2);
+    border: none;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-btn.instagram::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, #a855f7, #ec4899, #f97316);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    border-radius: var(--radius-full);
+}
+
+.hero-btn.instagram:hover::before {
+    opacity: 1;
+}
+
+.hero-btn.instagram:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 20px 25px -5px rgba(193, 53, 132, 0.4), 0 10px 10px -5px rgba(193, 53, 132, 0.3);
+    color: var(--white);
+}
+
+.hero-btn.instagram span,
+.hero-btn.instagram i {
+    position: relative;
+    z-index: 2;
 }
 
 .btn-ripple {
@@ -1866,34 +1904,123 @@ a {
     color: var(--white);
 }
 
-/* ===== BACK TO TOP ===== */
+/* ===== BACK TO TOP (HIDDEN) ===== */
 .back-to-top {
-    position: fixed;
-    bottom: var(--space-6);
-    right: var(--space-6);
-    width: 50px;
-    height: 50px;
-    background: var(--gradient-primary);
-    border: none;
-    border-radius: 50%;
-    color: var(--white);
-    font-size: 1.25rem;
-    cursor: pointer;
-    box-shadow: var(--shadow-lg);
-    transition: all 0.3s var(--ease-bounce);
-    z-index: 100;
+    display: none !important;
+}
+
+/* ===== DYNAMIC SCROLL BUTTON ===== */
+.dynamic-scroll-btn {
+    position: fixed !important;
+    bottom: var(--space-6) !important;
+    right: var(--space-6) !important;
+    width: 60px !important;
+    height: 60px !important;
+    background: var(--gradient-luxury) !important;
+    border: none !important;
+    border-radius: 50% !important;
+    color: var(--white) !important;
+    font-size: 1.5rem !important;
+    cursor: pointer !important;
+    box-shadow: var(--shadow-xl) !important;
+    transition: all 0.4s var(--ease-bounce) !important;
+    z-index: 9999 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: scale(1) !important;
+    overflow: hidden !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    pointer-events: auto !important;
+}
+
+.dynamic-scroll-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, #ec4899 0%, #f59e0b 50%, #6366f1 100%);
     opacity: 0;
-    visibility: hidden;
+    transition: opacity 0.3s ease;
+    border-radius: 50%;
 }
 
-.back-to-top.visible {
+.dynamic-scroll-btn:hover::before {
     opacity: 1;
-    visibility: visible;
 }
 
-.back-to-top:hover {
-    transform: translateY(-3px);
-    box-shadow: var(--shadow-glow);
+.dynamic-scroll-btn:hover {
+    transform: translateY(-5px) scale(1.1);
+    box-shadow: 0 15px 35px rgba(245, 158, 11, 0.4), 0 5px 15px rgba(236, 72, 153, 0.3);
+    color: var(--white);
+}
+
+.dynamic-scroll-btn:active {
+    transform: translateY(-2px) scale(1.05);
+}
+
+.dynamic-scroll-btn .scroll-arrow {
+    transition: all 0.5s var(--ease-bounce);
+    display: inline-block;
+    font-size: 1.5rem;
+    position: relative;
+    z-index: 2;
+}
+
+/* Smooth rotation animation for arrow direction change */
+.dynamic-scroll-btn.scroll-up .scroll-arrow {
+    transform: rotate(180deg);
+}
+
+/* Pulse animation for attention */
+.dynamic-scroll-btn::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    border: 2px solid var(--accent-gold);
+    border-radius: 50%;
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.8);
+    animation: scroll-pulse 2s infinite;
+}
+
+@keyframes scroll-pulse {
+    0% {
+        transform: translate(-50%, -50%) scale(0.8);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1.2);
+        opacity: 0;
+    }
+}
+
+/* Make sure button is always visible */
+.dynamic-scroll-btn.visible {
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+}
+
+/* Mobile positioning adjustment */
+@media (max-width: 768px) {
+    .dynamic-scroll-btn {
+        right: var(--space-4);
+        bottom: var(--space-6);
+    }
+}
+
+@media (max-width: 480px) {
+    .dynamic-scroll-btn {
+        right: var(--space-4);
+        bottom: var(--space-6);
+    }
 }
 
 /* ===== RESPONSIVE DESIGN ===== */

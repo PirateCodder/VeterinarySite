@@ -561,46 +561,203 @@ class StatsManager {
 // ===== SCROLL MANAGER ===== 
 class ScrollManager {
     constructor() {
-        this.backToTopButton = document.getElementById('backToTop');
-        this.isVisible = false;
+        this.dynamicScrollButton = document.getElementById('dynamicScrollBtn');
+        this.heroSection = document.getElementById('hero');
+        this.aboutSection = document.getElementById('about');
+        this.isScrollUp = false;
+        this.isScrolling = false;
+        this.visibilityInterval = null;
     }
 
     init() {
-        if (!this.backToTopButton) return;
+        if (!this.dynamicScrollButton) return;
 
+        // Ensure button is always visible
+        this.showButton();
+        this.startVisibilityWatcher();
+        
         this.bindEvents();
         this.handleScroll(); // Initial check
     }
 
+    showButton() {
+        if (this.dynamicScrollButton) {
+            this.dynamicScrollButton.style.opacity = '1';
+            this.dynamicScrollButton.style.visibility = 'visible';
+            this.dynamicScrollButton.style.display = 'flex';
+            this.dynamicScrollButton.style.pointerEvents = 'auto';
+            
+            // Preserve current transform if in animation
+            if (!this.isScrolling) {
+                this.dynamicScrollButton.style.transform = 'scale(1)';
+            }
+        }
+    }
+
+    startVisibilityWatcher() {
+        // Continuous monitoring to ensure button never disappears
+        this.visibilityInterval = setInterval(() => {
+            if (this.dynamicScrollButton) {
+                const computedStyle = window.getComputedStyle(this.dynamicScrollButton);
+                const opacity = parseFloat(computedStyle.opacity);
+                const visibility = computedStyle.visibility;
+                
+                // Force show if button becomes invisible
+                if (opacity < 1 || visibility === 'hidden') {
+                    this.showButton();
+                }
+            }
+        }, 100); // Check every 100ms
+    }
+
     bindEvents() {
-        // Throttled scroll handler
+        // More frequent scroll handler for better responsiveness
         const scrollHandler = Utils.throttle(() => {
             this.handleScroll();
-        }, CONFIG.scroll.debounce);
+        }, 8); // Increased frequency
 
         window.addEventListener('scroll', scrollHandler, { passive: true });
 
-        // Back to top button click
-        this.backToTopButton.addEventListener('click', () => {
-            this.scrollToTop();
+        // Dynamic scroll button click with improved handling
+        this.dynamicScrollButton.addEventListener('click', () => {
+            this.handleDynamicScroll();
+        });
+
+        // Additional event listeners to maintain visibility
+        window.addEventListener('resize', () => {
+            this.showButton();
+        });
+
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) {
+                this.showButton();
+            }
         });
     }
 
     handleScroll() {
         const scrollTop = window.pageYOffset;
-        const shouldBeVisible = scrollTop > window.innerHeight / 2;
 
-        if (shouldBeVisible !== this.isVisible) {
-            this.isVisible = shouldBeVisible;
-            this.backToTopButton.classList.toggle('visible', this.isVisible);
+        // Always ensure button is visible first
+        this.showButton();
+        
+        // Dynamic scroll button logic
+        this.updateDynamicScrollButton(scrollTop);
+        
+        // Force visibility after update
+        this.showButton();
+    }
+
+    updateDynamicScrollButton(scrollTop) {
+        if (!this.dynamicScrollButton || !this.heroSection || !this.aboutSection) return;
+
+        // Get hero section end position
+        const heroHeight = this.heroSection.offsetHeight;
+        const heroEnd = heroHeight;
+        
+        // Get about section position  
+        const aboutTop = this.aboutSection.offsetTop;
+
+        // Determine arrow direction:
+        // - Down arrow: when at top/hero section (before about section)
+        // - Up arrow: when at about section or below
+        const shouldBeScrollUp = scrollTop >= (aboutTop - window.innerHeight / 3);
+
+        // Update arrow direction with smooth animation
+        if (shouldBeScrollUp !== this.isScrollUp) {
+            this.isScrollUp = shouldBeScrollUp;
+            this.isScrolling = true;
+            
+            // Ensure button is visible before animation
+            this.showButton();
+            
+            // Add smooth rotation animation with preserved visibility
+            this.dynamicScrollButton.style.transform = 'scale(0.8)';
+            this.dynamicScrollButton.style.opacity = '1';
+            this.dynamicScrollButton.style.visibility = 'visible';
+            
+            setTimeout(() => {
+                this.dynamicScrollButton.classList.toggle('scroll-up', this.isScrollUp);
+                this.dynamicScrollButton.style.transform = 'scale(1)';
+                this.dynamicScrollButton.style.opacity = '1';
+                this.dynamicScrollButton.style.visibility = 'visible';
+                this.isScrolling = false;
+                
+                // Final visibility check
+                setTimeout(() => {
+                    this.showButton();
+                }, 50);
+            }, 150);
         }
     }
 
-    scrollToTop() {
-        window.scrollTo({
-            top: 0,
-            behavior: 'smooth'
-        });
+    handleDynamicScroll() {
+        if (!this.heroSection || !this.aboutSection) return;
+
+        const navHeight = document.getElementById('premiumNav')?.offsetHeight || 80;
+        this.isScrolling = true;
+
+        // Always ensure button stays visible during entire process
+        this.showButton();
+
+        // Create a visibility maintenance interval during scroll
+        const maintainVisibility = setInterval(() => {
+            this.showButton();
+        }, 50);
+
+        if (this.isScrollUp) {
+            // Scroll to hero section (top of page)
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        } else {
+            // Scroll to about section
+            const aboutTop = this.aboutSection.offsetTop - navHeight;
+            window.scrollTo({
+                top: aboutTop,
+                behavior: 'smooth'
+            });
+        }
+
+        // Detect scroll completion and maintain visibility
+        let lastScrollTop = window.pageYOffset;
+        let scrollCheckCount = 0;
+        const maxChecks = 50; // Maximum 2.5 seconds
+
+        const checkScrollComplete = () => {
+            const currentScrollTop = window.pageYOffset;
+            
+            if (Math.abs(currentScrollTop - lastScrollTop) < 1 || scrollCheckCount >= maxChecks) {
+                // Scroll completed
+                clearInterval(maintainVisibility);
+                this.isScrolling = false;
+                this.showButton();
+                
+                // Additional visibility reinforcement
+                setTimeout(() => {
+                    this.showButton();
+                    this.handleScroll(); // Refresh state
+                }, 100);
+                
+                return;
+            }
+            
+            lastScrollTop = currentScrollTop;
+            scrollCheckCount++;
+            this.showButton(); // Ensure visibility during scroll
+            
+            setTimeout(checkScrollComplete, 50);
+        };
+
+        // Start monitoring scroll completion
+        setTimeout(checkScrollComplete, 100);
+    }
+
+    destroy() {
+        if (this.visibilityInterval) {
+            clearInterval(this.visibilityInterval);
+        }
     }
 }
 
