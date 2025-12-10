@@ -1,9 +1,5 @@
-// ===== VETSIM PREMIUM VETERINARY CLINIC ===== 
-// Luxury Interactive Features & Animations
-
 'use strict';
 
-// ===== GLOBAL CONFIGURATION ===== 
 const CONFIG = {
     animations: {
         duration: 800,
@@ -25,7 +21,6 @@ const CONFIG = {
     }
 };
 
-// ===== UTILITY FUNCTIONS ===== 
 class Utils {
     static debounce(func, wait) {
         let timeout;
@@ -87,100 +82,15 @@ class Utils {
     }
 }
 
-// ===== LOADING SCREEN MANAGER ===== 
-class LoadingManager {
+class DirectManager {
     constructor() {
-        this.loadingScreen = document.getElementById('loadingScreen');
-        this.loadingBar = document.querySelector('.loading-bar');
-        this.resources = [];
-        this.loadedCount = 0;
-        this.isLoaded = false;
+        this.isInitialized = false;
     }
 
     init() {
-        this.collectResources();
-        this.startLoading();
-        
-        // Minimum loading time for smooth experience
-        setTimeout(() => {
-            this.complete();
-        }, 400);
-    }
+        if (this.isInitialized) return;
+        this.isInitialized = true;
 
-    collectResources() {
-        // Collect images
-        const images = Array.from(document.querySelectorAll('img'));
-        images.forEach(img => {
-            if (!img.complete) {
-                this.resources.push(img);
-                img.addEventListener('load', () => this.onResourceLoad());
-                img.addEventListener('error', () => this.onResourceLoad());
-            }
-        });
-
-        // Add hero background images
-        const heroSlides = document.querySelectorAll('.hero-slide');
-        heroSlides.forEach(slide => {
-            const bgImage = slide.dataset.bg;
-            if (bgImage) {
-                const img = new Image();
-                img.src = bgImage;
-                this.resources.push(img);
-                img.addEventListener('load', () => this.onResourceLoad());
-                img.addEventListener('error', () => this.onResourceLoad());
-            }
-        });
-    }
-
-    startLoading() {
-        if (this.resources.length === 0) {
-            this.updateProgress(100);
-            return;
-        }
-
-        // Simulate progressive loading
-        this.progressInterval = setInterval(() => {
-            const progress = Math.min((this.loadedCount / this.resources.length) * 100, 95);
-            this.updateProgress(progress);
-        }, 50);
-    }
-
-    onResourceLoad() {
-        this.loadedCount++;
-        if (this.loadedCount >= this.resources.length) {
-            this.updateProgress(100);
-        }
-    }
-
-    updateProgress(progress) {
-        if (this.loadingBar) {
-            this.loadingBar.style.width = `${progress}%`;
-        }
-    }
-
-    complete() {
-        if (this.isLoaded) return;
-        this.isLoaded = true;
-
-        clearInterval(this.progressInterval);
-        this.updateProgress(100);
-
-        // Hide loading screen with smooth animation
-        setTimeout(() => {
-            if (this.loadingScreen) {
-                this.loadingScreen.classList.add('hidden');
-                
-                // Initialize other components after loading
-                setTimeout(() => {
-                    document.body.classList.add('loaded');
-                    this.initializeComponents();
-                }, 500);
-            }
-        }, 300);
-    }
-
-    initializeComponents() {
-        // Initialize AOS
         if (typeof AOS !== 'undefined') {
             AOS.init({
                 duration: CONFIG.animations.duration,
@@ -192,16 +102,17 @@ class LoadingManager {
             });
         }
 
-        // Initialize other managers
         navigationManager.init();
         heroManager.init();
         statsManager.init();
+        galleryManager.init();
         scrollManager.init();
         interactionManager.init();
+        
+        document.body.classList.add('loaded');
     }
 }
 
-// ===== NAVIGATION MANAGER ===== 
 class NavigationManager {
     constructor() {
         this.nav = document.getElementById('premiumNav');
@@ -309,7 +220,6 @@ class NavigationManager {
     }
 }
 
-// ===== HERO SLIDER MANAGER ===== 
 class HeroManager {
     constructor() {
         this.heroSection = document.querySelector('.hero-section');
@@ -343,7 +253,6 @@ class HeroManager {
     }
 
     bindEvents() {
-        // Navigation buttons
         if (this.prevButton) {
             this.prevButton.addEventListener('click', () => {
                 this.previousSlide();
@@ -356,14 +265,12 @@ class HeroManager {
             });
         }
 
-        // Indicators
         this.indicators.forEach((indicator, index) => {
             indicator.addEventListener('click', () => {
                 this.goToSlide(index);
             });
         });
 
-        // Pause on hover
         this.heroSection.addEventListener('mouseenter', () => {
             this.pauseAutoPlay();
         });
@@ -372,7 +279,6 @@ class HeroManager {
             this.resumeAutoPlay();
         });
 
-        // Keyboard navigation
         document.addEventListener('keydown', (e) => {
             if (e.key === 'ArrowLeft') {
                 this.previousSlide();
@@ -381,10 +287,8 @@ class HeroManager {
             }
         });
 
-        // Touch/Swipe support
         this.addTouchSupport();
 
-        // Page visibility API
         document.addEventListener('visibilitychange', () => {
             if (document.hidden) {
                 this.pauseAutoPlay();
@@ -492,7 +396,6 @@ class HeroManager {
     }
 }
 
-// ===== STATISTICS COUNTER MANAGER ===== 
 class StatsManager {
     constructor() {
         this.statNumbers = document.querySelectorAll('.stat-number');
@@ -502,7 +405,6 @@ class StatsManager {
     init() {
         if (this.statNumbers.length === 0) return;
 
-        // Setup intersection observer for triggering animation
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting && !this.hasAnimated) {
@@ -558,7 +460,279 @@ class StatsManager {
     }
 }
 
-// ===== SCROLL MANAGER ===== 
+class GalleryManager {
+    constructor() {
+        this.galleryContainer = document.querySelector('.gallery-slider-container');
+        this.gallerySlider = document.getElementById('gallerySlider');
+        this.slides = document.querySelectorAll('.gallery-slide');
+        this.indicators = document.querySelectorAll('.gallery-indicator');
+        this.prevButton = document.getElementById('galleryPrev');
+        this.nextButton = document.getElementById('galleryNext');
+        
+        this.currentSlide = 0;
+        this.isTransitioning = false;
+        this.autoPlayInterval = null;
+        this.isPaused = false;
+        this.touchStartX = 0;
+        this.touchEndX = 0;
+        this.touchThreshold = 50;
+        this.autoPlayDuration = 6000;
+    }
+
+    init() {
+        if (!this.galleryContainer || this.slides.length === 0) return;
+
+        this.bindEvents();
+        this.updateSlides();
+        this.startAutoPlay();
+        this.setupIntersectionObserver();
+    }
+
+    bindEvents() {
+        // Navigation buttons
+        if (this.prevButton) {
+            this.prevButton.addEventListener('click', () => {
+                this.previousSlide();
+            });
+        }
+
+        if (this.nextButton) {
+            this.nextButton.addEventListener('click', () => {
+                this.nextSlide();
+            });
+        }
+
+        // Indicators
+        this.indicators.forEach((indicator, index) => {
+            indicator.addEventListener('click', () => {
+                this.goToSlide(index);
+            });
+        });
+
+        // Pause on hover
+        this.galleryContainer.addEventListener('mouseenter', () => {
+            this.pauseAutoPlay();
+        });
+
+        this.galleryContainer.addEventListener('mouseleave', () => {
+            this.resumeAutoPlay();
+        });
+
+        // Touch/Swipe support for mobile
+        this.addTouchSupport();
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (Utils.isElementInViewport(this.galleryContainer, 200)) {
+                if (e.key === 'ArrowLeft') {
+                    e.preventDefault();
+                    this.previousSlide();
+                } else if (e.key === 'ArrowRight') {
+                    e.preventDefault();
+                    this.nextSlide();
+                }
+            }
+        });
+
+        // Page visibility API
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                this.pauseAutoPlay();
+            } else {
+                this.resumeAutoPlay();
+            }
+        });
+
+        // Window resize handler
+        window.addEventListener('resize', Utils.debounce(() => {
+            this.updateSlides();
+        }, 250));
+    }
+
+    addTouchSupport() {
+        // Touch start
+        this.galleryContainer.addEventListener('touchstart', (e) => {
+            this.touchStartX = e.touches[0].clientX;
+            this.pauseAutoPlay();
+            
+            // Add visual feedback
+            this.galleryContainer.style.cursor = 'grabbing';
+        }, { passive: true });
+
+        // Touch move
+        this.galleryContainer.addEventListener('touchmove', (e) => {
+            this.touchEndX = e.touches[0].clientX;
+            
+            // Optional: Add visual feedback during swipe
+            const diffX = this.touchStartX - this.touchEndX;
+            const intensity = Math.min(Math.abs(diffX) / 100, 1);
+            
+            // Subtle transform preview
+            if (Math.abs(diffX) > 10) {
+                this.gallerySlider.style.transform = `translateX(${-diffX * 0.1}px)`;
+            }
+        }, { passive: true });
+
+        // Touch end
+        this.galleryContainer.addEventListener('touchend', (e) => {
+            this.touchEndX = e.changedTouches[0].clientX;
+            const diffX = this.touchStartX - this.touchEndX;
+
+            // Reset transform
+            this.gallerySlider.style.transform = '';
+            this.galleryContainer.style.cursor = '';
+
+            // Handle swipe
+            if (Math.abs(diffX) > this.touchThreshold) {
+                if (diffX > 0) {
+                    // Swipe left (next slide)
+                    this.nextSlide();
+                } else {
+                    // Swipe right (previous slide)
+                    this.previousSlide();
+                }
+            }
+
+            // Resume autoplay after delay
+            setTimeout(() => {
+                this.resumeAutoPlay();
+            }, 2000);
+        }, { passive: true });
+
+        // Prevent context menu on long press
+        this.galleryContainer.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+        });
+    }
+
+    setupIntersectionObserver() {
+        // Only run autoplay when gallery is visible
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    this.resumeAutoPlay();
+                } else {
+                    this.pauseAutoPlay();
+                }
+            });
+        }, {
+            threshold: 0.3,
+            rootMargin: '-50px 0px'
+        });
+
+        observer.observe(this.galleryContainer);
+    }
+
+    nextSlide() {
+        const nextIndex = (this.currentSlide + 1) % this.slides.length;
+        this.goToSlide(nextIndex);
+    }
+
+    previousSlide() {
+        const prevIndex = (this.currentSlide - 1 + this.slides.length) % this.slides.length;
+        this.goToSlide(prevIndex);
+    }
+
+    goToSlide(index) {
+        if (this.isTransitioning || index === this.currentSlide) return;
+
+        this.isTransitioning = true;
+        this.currentSlide = index;
+        
+        this.updateSlides();
+        this.updateIndicators();
+        
+        // Reset transition lock - updated for premium smooth transitions
+        setTimeout(() => {
+            this.isTransitioning = false;
+        }, 1200);
+
+        // Restart autoplay
+        this.restartAutoPlay();
+    }
+
+    updateSlides() {
+        this.slides.forEach((slide, index) => {
+            // Remove all position classes
+            slide.classList.remove('active', 'next', 'prev');
+            
+            // Calculate relative position
+            const isActive = index === this.currentSlide;
+            const isNext = index === (this.currentSlide + 1) % this.slides.length;
+            const isPrev = index === (this.currentSlide - 1 + this.slides.length) % this.slides.length;
+            
+            if (isActive) {
+                slide.classList.add('active');
+            } else if (isNext) {
+                slide.classList.add('next');
+            } else if (isPrev) {
+                slide.classList.add('prev');
+            }
+            
+            // Set z-index for proper layering
+            if (isActive) {
+                slide.style.zIndex = '3';
+            } else if (isNext || isPrev) {
+                slide.style.zIndex = '2';
+            } else {
+                slide.style.zIndex = '1';
+            }
+        });
+    }
+
+    updateIndicators() {
+        this.indicators.forEach((indicator, index) => {
+            indicator.classList.toggle('active', index === this.currentSlide);
+        });
+    }
+
+    startAutoPlay() {
+        this.autoPlayInterval = setInterval(() => {
+            if (!this.isPaused && !this.isTransitioning) {
+                this.nextSlide();
+            }
+        }, this.autoPlayDuration);
+    }
+
+    pauseAutoPlay() {
+        this.isPaused = true;
+    }
+
+    resumeAutoPlay() {
+        this.isPaused = false;
+    }
+
+    restartAutoPlay() {
+        clearInterval(this.autoPlayInterval);
+        this.startAutoPlay();
+    }
+
+    destroy() {
+        clearInterval(this.autoPlayInterval);
+        this.isPaused = true;
+    }
+
+    // Public methods for external control
+    play() {
+        this.isPaused = false;
+        if (!this.autoPlayInterval) {
+            this.startAutoPlay();
+        }
+    }
+
+    pause() {
+        this.pauseAutoPlay();
+    }
+
+    getCurrentSlide() {
+        return this.currentSlide;
+    }
+
+    getTotalSlides() {
+        return this.slides.length;
+    }
+}
+
 class ScrollManager {
     constructor() {
         this.dynamicScrollButton = document.getElementById('dynamicScrollBtn');
@@ -572,12 +746,11 @@ class ScrollManager {
     init() {
         if (!this.dynamicScrollButton) return;
 
-        // Ensure button is always visible
         this.showButton();
         this.startVisibilityWatcher();
         
         this.bindEvents();
-        this.handleScroll(); // Initial check
+        this.handleScroll();
     }
 
     showButton() {
@@ -761,7 +934,6 @@ class ScrollManager {
     }
 }
 
-// ===== INTERACTION MANAGER ===== 
 class InteractionManager {
     constructor() {
         this.rippleElements = document.querySelectorAll('[class*="btn"], [class*="button"]');
@@ -784,7 +956,6 @@ class InteractionManager {
     }
 
     createRipple(event, element) {
-        // Skip if element already has a ripple container
         if (element.querySelector('.btn-ripple')) return;
 
         const rect = element.getBoundingClientRect();
@@ -811,7 +982,6 @@ class InteractionManager {
         element.style.overflow = 'hidden';
         element.appendChild(ripple);
 
-        // Add animation keyframes if not already present
         this.addRippleKeyframes();
 
         setTimeout(() => {
@@ -953,7 +1123,6 @@ class InteractionManager {
     }
 }
 
-// ===== PERFORMANCE MONITOR ===== 
 class PerformanceMonitor {
     constructor() {
         this.metrics = {
@@ -968,15 +1137,12 @@ class PerformanceMonitor {
         if (this.isMonitoring) return;
         this.isMonitoring = true;
 
-        // FPS monitoring
         this.monitorFPS();
         
-        // Memory monitoring (if available)
         if (performance.memory) {
             this.monitorMemory();
         }
 
-        // Page timing
         this.recordPageTiming();
     }
 
@@ -1057,24 +1223,24 @@ class PerformanceMonitor {
     }
 }
 
-// ===== GLOBAL MANAGERS INITIALIZATION ===== 
-const loadingManager = new LoadingManager();
+const directManager = new DirectManager();
 const navigationManager = new NavigationManager();
 const heroManager = new HeroManager();
 const statsManager = new StatsManager();
+const galleryManager = new GalleryManager();
 const scrollManager = new ScrollManager();
 const interactionManager = new InteractionManager();
 const performanceMonitor = new PerformanceMonitor();
 
-// ===== APPLICATION INITIALIZATION ===== 
 class VetSimApp {
     constructor() {
         this.isInitialized = false;
         this.managers = {
-            loading: loadingManager,
+            direct: directManager,
             navigation: navigationManager,
             hero: heroManager,
             stats: statsManager,
+            gallery: galleryManager,
             scroll: scrollManager,
             interaction: interactionManager,
             performance: performanceMonitor
@@ -1085,18 +1251,14 @@ class VetSimApp {
         if (this.isInitialized) return;
         this.isInitialized = true;
 
-        // Start performance monitoring in development
         if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
             this.managers.performance.start();
         }
 
-        // Initialize loading manager (will handle other managers)
-        this.managers.loading.init();
+        this.managers.direct.init();
 
-        // Global error handling
         this.setupErrorHandling();
 
-        // Console greeting
         this.showConsoleGreeting();
     }
 
@@ -1136,10 +1298,8 @@ class VetSimApp {
     }
 }
 
-// ===== INITIALIZE APPLICATION ===== 
 const vetSimApp = new VetSimApp();
 
-// DOM Content Loaded Event
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
         vetSimApp.init();
@@ -1148,12 +1308,44 @@ if (document.readyState === 'loading') {
     vetSimApp.init();
 }
 
-// Export for potential external use
 window.VetSimApp = vetSimApp;
 
-// ===== ADDITIONAL PREMIUM FEATURES ===== 
+function openMaps() {
+    const address = "VetSim Veteriner, Nergiz Mahallesi, Girne Bulvarı No:131/A, Karşıyaka, İzmir";
+    const lat = "38.455360";
+    const lng = "27.112830";
+    
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    const isAndroid = /Android/.test(navigator.userAgent);
+    
+    if (isIOS) {
+        const appleMapsUrl = `maps://maps.apple.com/?q=${encodeURIComponent(address)}&ll=${lat},${lng}`;
+        const googleMapsUrl = `https://maps.google.com/maps?q=${encodeURIComponent(address)}&ll=${lat},${lng}`;
+        
+        window.location.href = appleMapsUrl;
+        
+        setTimeout(() => {
+            window.open(googleMapsUrl, '_blank');
+        }, 2000);
+        
+    } else if (isAndroid) {
+        const googleMapsApp = `geo:${lat},${lng}?q=${encodeURIComponent(address)}`;
+        const googleMapsWeb = `https://maps.google.com/maps?q=${encodeURIComponent(address)}&ll=${lat},${lng}`;
+        
+        try {
+            window.location.href = googleMapsApp;
+        } catch (error) {
+            window.open(googleMapsWeb, '_blank');
+        }
+        
+    } else {
+        const googleMapsWeb = `https://maps.google.com/maps?q=${encodeURIComponent(address)}&ll=${lat},${lng}`;
+        window.open(googleMapsWeb, '_blank');
+    }
+}
 
-// Smooth scroll polyfill for older browsers
+window.openMaps = openMaps;
+
 if (!('scrollBehavior' in document.documentElement.style)) {
     const script = document.createElement('script');
     script.src = 'https://unpkg.com/smoothscroll-polyfill@0.4.4/dist/smoothscroll.min.js';
@@ -1164,23 +1356,15 @@ if (!('scrollBehavior' in document.documentElement.style)) {
     document.head.appendChild(script);
 }
 
-// Service Worker registration for PWA features (if needed)
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        // Uncomment when service worker is available
-        // navigator.serviceWorker.register('/sw.js')
-        //     .then(registration => console.log('SW registered:', registration))
-        //     .catch(error => console.log('SW registration failed:', error));
     });
 }
 
-// Dark mode detection and handling
 if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-    // Could add dark mode support here
     document.documentElement.setAttribute('data-theme', 'dark');
 }
 
-// Enhanced console commands for development
 if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
     window.vetSim = {
         version: '2.0.0',
