@@ -1311,36 +1311,45 @@ if (document.readyState === 'loading') {
 window.VetSimApp = vetSimApp;
 
 function openMaps() {
-    const address = "VetSim Veteriner, Nergiz Mahallesi, Girne Bulvarı No:131/A, Karşıyaka, İzmir";
-    const lat = "38.455360";
-    const lng = "27.112830";
+    const address = "VetSim Veteriner Kliniği, Nergiz, Girne Blv No: 131/A, 35580 Karşıyaka/İzmir";
+    const lat = "38.461331";
+    const lng = "27.107659";
     
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
     const isAndroid = /Android/.test(navigator.userAgent);
     
     if (isIOS) {
-        const appleMapsUrl = `maps://maps.apple.com/?q=${encodeURIComponent(address)}&ll=${lat},${lng}`;
-        const googleMapsUrl = `https://maps.google.com/maps?q=${encodeURIComponent(address)}&ll=${lat},${lng}`;
+        // iOS için Apple Maps'te yol tarifi (sadece hedef konum)
+        const appleMapsUrl = `maps://maps.apple.com/?daddr=${lat},${lng}&dirflg=d`;
+        const fallbackUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
         
         window.location.href = appleMapsUrl;
         
+        // Apple Maps açılamazsa Google Maps'i aç
         setTimeout(() => {
-            window.open(googleMapsUrl, '_blank');
-        }, 2000);
+            window.open(fallbackUrl, '_blank');
+        }, 1500);
         
     } else if (isAndroid) {
-        const googleMapsApp = `geo:${lat},${lng}?q=${encodeURIComponent(address)}`;
-        const googleMapsWeb = `https://maps.google.com/maps?q=${encodeURIComponent(address)}&ll=${lat},${lng}`;
+        // Android için Google Navigation (yol tarifi)
+        const googleNavUrl = `google.navigation:q=${lat},${lng}`;
+        const fallbackUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
         
         try {
-            window.location.href = googleMapsApp;
+            window.location.href = googleNavUrl;
+            
+            // Navigation app açılamazsa web'i aç
+            setTimeout(() => {
+                window.open(fallbackUrl, '_blank');
+            }, 1500);
         } catch (error) {
-            window.open(googleMapsWeb, '_blank');
+            window.open(fallbackUrl, '_blank');
         }
         
     } else {
-        const googleMapsWeb = `https://maps.google.com/maps?q=${encodeURIComponent(address)}&ll=${lat},${lng}`;
-        window.open(googleMapsWeb, '_blank');
+        // Desktop ve diğer platformlar için Google Maps web yol tarifi
+        const webMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+        window.open(webMapsUrl, '_blank');
     }
 }
 
