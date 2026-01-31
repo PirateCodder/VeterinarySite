@@ -1229,7 +1229,6 @@ if (document.readyState === 'loading') {
 window.VetSimApp = vetSimApp;
 
 function openMaps() {
-    const address = "VetSim Veteriner Kliniği, Nergiz, Girne Blv No: 131/A, 35580 Karşıyaka/İzmir";
     const lat = "38.461331";
     const lng = "27.107659";
     
@@ -1237,9 +1236,9 @@ function openMaps() {
     const isAndroid = /Android/.test(navigator.userAgent);
     
     if (isIOS) {
-        // iOS için Apple Maps'te yol tarifi (sadece hedef konum)
+        // iOS için Apple Maps'te yol tarifi
         const appleMapsUrl = `maps://maps.apple.com/?daddr=${lat},${lng}&dirflg=d`;
-        const fallbackUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+        const fallbackUrl = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
         
         window.location.href = appleMapsUrl;
         
@@ -1249,9 +1248,9 @@ function openMaps() {
         }, 1500);
         
     } else if (isAndroid) {
-        // Android için Google Navigation (yol tarifi)
+        // Android için Google Navigation
         const googleNavUrl = `google.navigation:q=${lat},${lng}`;
-        const fallbackUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+        const fallbackUrl = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
         
         try {
             window.location.href = googleNavUrl;
@@ -1265,8 +1264,8 @@ function openMaps() {
         }
         
     } else {
-        // Desktop ve diğer platformlar için Google Maps web yol tarifi
-        const webMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+        // Desktop ve diğer platformlar için Google Maps
+        const webMapsUrl = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
         window.open(webMapsUrl, '_blank');
     }
 }
