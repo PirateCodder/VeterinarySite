@@ -92,13 +92,12 @@ class DirectManager {
         this.isInitialized = true;
 
         if (typeof AOS !== 'undefined') {
+            // Hafif ve performanslı animasyonlar
             AOS.init({
-                duration: CONFIG.animations.duration,
-                easing: CONFIG.animations.easing,
-                once: true,
-                mirror: false,
-                offset: 50,
-                delay: 100
+                duration: 600, // Hızlı ve modern geçiş
+                once: true,    // Animasyon sadece bir kez çalışsın (performans dostu)
+                disable: 'phone', // Sadece çok küçük telefonlarda devre dışı
+                offset: 50     // Eleman ekrana girdiği an başlasın
             });
         }
 
@@ -240,7 +239,11 @@ class HeroManager {
         this.setupSlideBackgrounds();
         this.bindEvents();
         this.startAutoPlay();
-        this.preloadImages();
+        
+        // PreloadImages fonksiyonunu sayfa tamamen yüklendikten sonra çalıştır
+        window.addEventListener('load', () => {
+            this.preloadImages();
+        });
     }
 
     setupSlideBackgrounds() {

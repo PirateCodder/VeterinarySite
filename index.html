@@ -33,7 +33,28 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
-    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <!-- Critical CSS Inline -->
+    <style>
+        /* Hero Critical CSS */
+        .hero-section{position:relative;height:80vh;min-height:600px;overflow:hidden;display:flex;align-items:center;justify-content:center}
+        .hero-background{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1}
+        .hero-slide{position:absolute;top:0;left:0;width:100%;height:100%;background-size:cover;background-position:center;background-repeat:no-repeat;opacity:0;transition:opacity 1s ease-in-out}
+        .hero-slide.active{opacity:1}
+        .hero-slide:first-child{background-image:url('images/1.webp')!important;opacity:1!important}
+        .hero-overlay{position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(135deg,rgba(15,23,42,0.8) 0%,rgba(99,102,241,0.6) 30%,rgba(236,72,153,0.6) 70%,rgba(15,23,42,0.8) 100%)}
+        .hero-content{position:relative;z-index:5;width:100%;height:100%;display:flex;align-items:center;justify-content:center}
+        
+        /* Nav Critical CSS */
+        .premium-nav{position:fixed;top:0;left:0;right:0;z-index:1000;background:rgba(255,255,255,0.95);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,0.2);padding:1rem 0;transition:all 0.3s cubic-bezier(0.4,0,0.2,1)}
+        .nav-container{max-width:1280px;margin:0 auto;padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;gap:2rem}
+        .nav-brand{display:flex;align-items:center;gap:1rem}
+        .nav-logo-img{width:45px;height:45px;border-radius:0.5rem;transition:transform 0.3s cubic-bezier(0.68,-0.55,0.265,1.55)}
+        .nav-brand-title{font-size:1.5rem;font-weight:800;background:linear-gradient(135deg,#6366f1 0%,#8b5cf6 50%,#ec4899 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin:0}
+        .nav-links{display:flex;align-items:center;gap:0.25rem}
+        .nav-emergency{display:flex;align-items:center;gap:0.75rem}
+    </style>
+    
+    <script defer src="https://unpkg.com/@phosphor-icons/web"></script>
     
     <script type="application/ld+json">
     {
@@ -79,13 +100,14 @@
     </script>
     
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://unpkg.com/aos@2.3.1/dist/aos.css">
 </head>
 <body>
     <nav class="premium-nav" id="premiumNav">
         <div class="nav-container">
             <div class="nav-brand">
                 <div class="nav-logo">
-                    <img src="images/logo.webp" alt="VetSim Veteriner Kliniği İzmir Karşıyaka Logo - 7/24 Acil Veteriner Hizmeti" class="nav-logo-img">
+                    <img src="images/logo.webp" alt="VetSim Veteriner Kliniği İzmir Karşıyaka Logo - 7/24 Acil Veteriner Hizmeti" class="nav-logo-img" width="482" height="517">
                 </div>
                 <div class="nav-brand-info">
                     <div class="nav-brand-title">VetSim</div>
@@ -267,8 +289,8 @@
 
                 <div class="about-visual">
                     <div class="about-image-container" data-aos="fade-left">
-                        <div class="about-image-wrapper">
-                            <img src="images/png1.webp" alt="İzmir Karşıyaka veteriner hizmeti - VetSim 7/24 acil veteriner - veteriner hekim Elif Simge Taşköprü - kedi köpek tedavi" class="about-image">
+                    <div class="about-image-wrapper">
+                            <img src="images/png1.webp" alt="İzmir Karşıyaka veteriner hizmeti - VetSim 7/24 acil veteriner - veteriner hekim Elif Simge Taşköprü - kedi köpek tedavi" class="about-image" width="1080" height="1350">
                             <div class="image-overlay">
                                 <div class="overlay-content">
                                     <i class="ph ph-play-circle"></i>
@@ -444,7 +466,7 @@
             <div class="gallery-slider-container" data-aos="fade-up" data-aos-delay="200">
                 <div class="gallery-slider" id="gallerySlider">
                     <div class="gallery-slide active">
-                        <img src="images/veterinary4.webp" alt="Karşıyaka veteriner cerrahi operasyon - VetSim modern veteriner kliniği - İzmir 7/24 acil veteriner" loading="lazy">
+                        <img src="images/veterinary4.webp" alt="Karşıyaka veteriner cerrahi operasyon - VetSim modern veteriner kliniği - İzmir 7/24 acil veteriner" loading="lazy" width="940" height="788">
                         <div class="slide-overlay">
                             <div class="slide-content">
                                 <h3>Profesyonel Bakım</h3>
@@ -453,7 +475,7 @@
                         </div>
                     </div>
                     <div class="gallery-slide">
-                        <img src="images/veterinary5.webp" alt="İzmir acil veteriner 7/24 - VetSim veteriner hekim Elif Simge Taşköprü - Karşıyaka cerrahi" loading="lazy">
+                        <img src="images/veterinary5.webp" alt="İzmir acil veteriner 7/24 - VetSim veteriner hekim Elif Simge Taşköprü - Karşıyaka cerrahi" loading="lazy" width="940" height="788">
                         <div class="slide-overlay">
                             <div class="slide-content">
                                 <h3>Sevgi Dolu Hizmet</h3>
@@ -462,7 +484,7 @@
                         </div>
                     </div>
                     <div class="gallery-slide">
-                        <img src="images/veterinary6.webp" alt="VetSim veteriner hekim Elif Simge Taşköprü - Karşıyaka veteriner cerrahi operasyon - İzmir 7/24 acil" loading="lazy">
+                        <img src="images/veterinary6.webp" alt="VetSim veteriner hekim Elif Simge Taşköprü - Karşıyaka veteriner cerrahi operasyon - İzmir 7/24 acil" loading="lazy" width="1080" height="1350">
                         <div class="slide-overlay">
                             <div class="slide-content">
                                 <h3>Muayene</h3>
@@ -471,7 +493,7 @@
                         </div>
                     </div>
                     <div class="gallery-slide">
-                        <img src="images/veterinary7.webp" alt="Karşıyaka veteriner cerrahi operasyon - VetSim modern tıbbi ekipman - İzmir acil veteriner 7/24" loading="lazy">
+                        <img src="images/veterinary7.webp" alt="Karşıyaka veteriner cerrahi operasyon - VetSim modern tıbbi ekipman - İzmir acil veteriner 7/24" loading="lazy" width="1080" height="1350">
                         <div class="slide-overlay">
                             <div class="slide-content">
                                 <h3>Modern Tedavi</h3>
@@ -480,7 +502,7 @@
                         </div>
                     </div>
                     <div class="gallery-slide">
-                        <img src="images/veterinary8.webp" alt="İzmir acil veteriner 7/24 - VetSim veteriner hekim - Karşıyaka cerrahi operasyon hizmeti" loading="lazy">
+                        <img src="images/veterinary8.webp" alt="İzmir acil veteriner 7/24 - VetSim veteriner hekim - Karşıyaka cerrahi operasyon hizmeti" loading="lazy" width="708" height="676">
                         <div class="slide-overlay">
                             <div class="slide-content">
                                 <h3>Sevgi Dolu Hizmet</h3>
@@ -489,7 +511,7 @@
                         </div>
                     </div>
                     <div class="gallery-slide">
-                        <img src="images/veterinary9.webp" alt="Karşıyaka veteriner cerrahi operasyon - İzmir VetSim 7/24 acil veteriner - veteriner hekim Elif Simge" loading="lazy">
+                        <img src="images/veterinary9.webp" alt="Karşıyaka veteriner cerrahi operasyon - İzmir VetSim 7/24 acil veteriner - veteriner hekim Elif Simge" loading="lazy" width="1080" height="1350">
                         <div class="slide-overlay">
                             <div class="slide-content">
                                 <h3>Acil Müdahale</h3>
@@ -498,7 +520,7 @@
                         </div>
                     </div>
                     <div class="gallery-slide">
-                        <img src="images/Veterinary1.webp" alt="VetSim veteriner hekim Elif Simge Taşköprü - İzmir Karşıyaka cerrahi operasyon - 7/24 acil" loading="lazy">
+                        <img src="images/Veterinary1.webp" alt="VetSim veteriner hekim Elif Simge Taşköprü - İzmir Karşıyaka cerrahi operasyon - 7/24 acil" loading="lazy" width="638" height="525">
                         <div class="slide-overlay">
                             <div class="slide-content">
                                 <h3>Güvenilir Merkez</h3>
@@ -507,7 +529,7 @@
                         </div>
                     </div>
                     <div class="gallery-slide">
-                        <img src="images/veterinary2.webp" alt="İzmir acil veteriner 7/24 - Karşıyaka veteriner cerrahi - VetSim veteriner hekim bakımı" loading="lazy">
+                        <img src="images/veterinary2.webp" alt="İzmir acil veteriner 7/24 - Karşıyaka veteriner cerrahi - VetSim veteriner hekim bakımı" loading="lazy" width="535" height="605">
                         <div class="slide-overlay">
                             <div class="slide-content">
                                 <h3>Kaliteli Bakım</h3>
@@ -516,7 +538,7 @@
                         </div>
                     </div>
                     <div class="gallery-slide">
-                        <img src="images/veterinary3.webp" alt="Karşıyaka veteriner cerrahi operasyon - VetSim veteriner hekim Elif Simge Taşköprü - İzmir 7/24 acil" loading="lazy">
+                        <img src="images/veterinary3.webp" alt="Karşıyaka veteriner cerrahi operasyon - VetSim veteriner hekim Elif Simge Taşköprü - İzmir 7/24 acil" loading="lazy" width="940" height="788">
                         <div class="slide-overlay">
                             <div class="slide-content">
                                 <h3>Sevgi Dolu Tedavi</h3>
@@ -641,9 +663,9 @@
         <div class="container">
             <div class="footer-content">
                 <div class="footer-brand">
-                    <div class="footer-logo">
-                    <img src="images/logo.webp" alt="VetSim Veteriner Kliniği İzmir Karşıyaka Logo - Acil Veteriner Hizmeti - Pet Grooming - Ameliyat">
-                    </div>
+                <div class="footer-logo">
+                    <img src="images/logo.webp" alt="VetSim Veteriner Kliniği İzmir Karşıyaka Logo - Acil Veteriner Hizmeti - Pet Grooming - Ameliyat" width="482" height="517">
+                </div>
                     <div class="footer-brand-info">
                         <h3>VetSim</h3>
                         <p>Veteriner Hekim <strong>Elif Simge TAŞKÖPRÜ</strong></p>
@@ -718,8 +740,8 @@
         <i class="ph ph-arrow-down scroll-arrow"></i>
     </button>
 
-    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script defer src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     
-    <script src="js/script.js"></script>
+    <script defer src="js/script.js"></script>
 </body>
 </html>
