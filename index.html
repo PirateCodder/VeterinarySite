@@ -15,12 +15,24 @@
     <meta name="geo.position" content="38.461331;27.107659">
     <meta name="ICBM" content="38.461331, 27.107659">
     
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-3J4NXX79B2"></script>
     <script>
+      // GTM'i sayfa yüklendikten 3 saniye sonra yükle (PageSpeed optimizasyonu)
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-3J4NXX79B2');
+      
+      window.addEventListener('load', function() {
+        setTimeout(function() {
+          var gtagScript = document.createElement('script');
+          gtagScript.async = true;
+          gtagScript.src = 'https://www.googletagmanager.com/gtag/js?id=G-3J4NXX79B2';
+          document.head.appendChild(gtagScript);
+          
+          gtagScript.onload = function() {
+            gtag('js', new Date());
+            gtag('config', 'G-3J4NXX79B2');
+          };
+        }, 3000);
+      });
     </script>
     
     <link rel="icon" type="image/webp" href="images/logo.webp">
@@ -52,9 +64,21 @@
         .nav-brand-title{font-size:1.5rem;font-weight:800;background:linear-gradient(135deg,#6366f1 0%,#8b5cf6 50%,#ec4899 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin:0}
         .nav-links{display:flex;align-items:center;gap:0.25rem}
         .nav-emergency{display:flex;align-items:center;gap:0.75rem}
+        
+        /* About Section Critical CSS */
+        .about-section{padding:6rem 0;background:linear-gradient(180deg,#f8fafc 0%,#ffffff 100%)}
+        .container{max-width:1280px;margin:0 auto;padding:0 1.5rem}
+        .about-content{display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center}
+        .section-header{margin-bottom:2rem}
+        .section-badge{display:inline-block;padding:0.5rem 1rem;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border-radius:2rem;font-size:0.875rem;font-weight:600;margin-bottom:1rem}
+        .section-title{font-size:2.5rem;font-weight:800;line-height:1.2;margin-bottom:1rem;color:#0f172a}
+        .gradient-text{background:linear-gradient(135deg,#6366f1 0%,#8b5cf6 50%,#ec4899 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+        .section-subtitle{font-size:1.125rem;color:#64748b;line-height:1.6}
+        @media (max-width:768px){.about-content{grid-template-columns:1fr;gap:2rem}.section-title{font-size:2rem}}
     </style>
     
-    <script defer src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css"></noscript>
     
     <script type="application/ld+json">
     {
@@ -99,15 +123,18 @@
     }
     </script>
     
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="https://unpkg.com/aos@2.3.1/dist/aos.css">
+    <link rel="preload" href="css/style.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="css/style.css"></noscript>
+    
+    <link rel="preload" href="https://unpkg.com/aos@2.3.1/dist/aos.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://unpkg.com/aos@2.3.1/dist/aos.css"></noscript>
 </head>
 <body>
     <nav class="premium-nav" id="premiumNav">
         <div class="nav-container">
             <div class="nav-brand">
                 <div class="nav-logo">
-                    <img src="images/logo.webp" alt="VetSim Veteriner Kliniği İzmir Karşıyaka Logo - 7/24 Acil Veteriner Hizmeti" class="nav-logo-img" width="482" height="517">
+                    <img src="images/logo.webp" alt="VetSim Veteriner Kliniği İzmir Karşıyaka Logo - 7/24 Acil Veteriner Hizmeti" class="nav-logo-img" width="45" height="48">
                 </div>
                 <div class="nav-brand-info">
                     <div class="nav-brand-title">VetSim</div>
@@ -290,7 +317,7 @@
                 <div class="about-visual">
                     <div class="about-image-container" data-aos="fade-left">
                     <div class="about-image-wrapper">
-                            <img src="images/png1.webp" alt="İzmir Karşıyaka veteriner hizmeti - VetSim 7/24 acil veteriner - veteriner hekim Elif Simge Taşköprü - kedi köpek tedavi" class="about-image" width="1080" height="1350">
+                            <img src="images/png1.webp" alt="İzmir Karşıyaka veteriner hizmeti - VetSim 7/24 acil veteriner - veteriner hekim Elif Simge Taşköprü - kedi köpek tedavi" class="about-image" width="800" height="1000">
                             <div class="image-overlay">
                                 <div class="overlay-content">
                                     <i class="ph ph-play-circle"></i>
@@ -664,7 +691,7 @@
             <div class="footer-content">
                 <div class="footer-brand">
                 <div class="footer-logo">
-                    <img src="images/logo.webp" alt="VetSim Veteriner Kliniği İzmir Karşıyaka Logo - Acil Veteriner Hizmeti - Pet Grooming - Ameliyat" width="482" height="517">
+                    <img src="images/logo.webp" alt="VetSim Veteriner Kliniği İzmir Karşıyaka Logo - Acil Veteriner Hizmeti - Pet Grooming - Ameliyat" width="60" height="64">
                 </div>
                     <div class="footer-brand-info">
                         <h3>VetSim</h3>
@@ -736,7 +763,7 @@
         </div>
     </footer>
 
-    <button class="dynamic-scroll-btn" id="dynamicScrollBtn">
+    <button class="dynamic-scroll-btn" id="dynamicScrollBtn" aria-label="Yukarı Çık">
         <i class="ph ph-arrow-down scroll-arrow"></i>
     </button>
 

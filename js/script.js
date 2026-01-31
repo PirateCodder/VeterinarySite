@@ -119,11 +119,29 @@ class NavigationManager {
         this.mobileToggle = document.getElementById('mobileMenuToggle');
         this.isScrolled = false;
         this.activeSection = 'hero';
+        this.sectionPositions = []; // Cache section positions
+        this.shouldRecalculate = true;
     }
 
     init() {
         this.bindEvents();
         this.updateActiveLink();
+        this.cacheSectionPositions();
+        
+        // Recalculate on resize
+        window.addEventListener('resize', Utils.debounce(() => {
+            this.shouldRecalculate = true;
+        }, 250));
+    }
+    
+    cacheSectionPositions() {
+        const sections = document.querySelectorAll('section[id]');
+        this.sectionPositions = Array.from(sections).map(section => ({
+            id: section.getAttribute('id'),
+            top: section.offsetTop,
+            height: section.offsetHeight
+        }));
+        this.shouldRecalculate = false;
     }
 
     bindEvents() {
@@ -170,24 +188,27 @@ class NavigationManager {
     }
 
     updateActiveSection() {
-        const sections = document.querySelectorAll('section[id]');
+        // Recalculate positions if needed (after resize)
+        if (this.shouldRecalculate) {
+            this.cacheSectionPositions();
+        }
+        
         const scrollTop = window.pageYOffset;
         const windowHeight = window.innerHeight;
 
-        sections.forEach(section => {
-            const rect = section.getBoundingClientRect();
-            const sectionTop = rect.top + scrollTop;
-            const sectionHeight = rect.height;
-
-            if (scrollTop >= sectionTop - windowHeight / 3 && 
-                scrollTop < sectionTop + sectionHeight - windowHeight / 3) {
-                const sectionId = section.getAttribute('id');
-                if (sectionId !== this.activeSection) {
-                    this.activeSection = sectionId;
+        // Use cached positions instead of getBoundingClientRect
+        for (let i = 0; i < this.sectionPositions.length; i++) {
+            const section = this.sectionPositions[i];
+            
+            if (scrollTop >= section.top - windowHeight / 3 && 
+                scrollTop < section.top + section.height - windowHeight / 3) {
+                if (section.id !== this.activeSection) {
+                    this.activeSection = section.id;
                     this.updateActiveLink();
                 }
+                break;
             }
-        });
+        }
     }
 
     updateActiveLink() {
@@ -750,7 +771,6 @@ class ScrollManager {
         if (!this.dynamicScrollButton) return;
 
         this.showButton();
-        this.startVisibilityWatcher();
         
         this.bindEvents();
         this.handleScroll();
@@ -760,7 +780,6 @@ class ScrollManager {
         if (this.dynamicScrollButton) {
             this.dynamicScrollButton.style.opacity = '1';
             this.dynamicScrollButton.style.visibility = 'visible';
-            this.dynamicScrollButton.style.display = 'flex';
             this.dynamicScrollButton.style.pointerEvents = 'auto';
             
             // Preserve current transform if in animation
@@ -770,99 +789,40 @@ class ScrollManager {
         }
     }
 
-    startVisibilityWatcher() {
-        // Continuous monitoring to ensure button never disappears
-        this.visibilityInterval = setInterval(() => {
-            if (this.dynamicScrollButton) {
-                const computedStyle = window.getComputedStyle(this.dynamicScrollButton);
-                const opacity = parseFloat(computedStyle.opacity);
-                const visibility = computedStyle.visibility;
-                
-                // Force show if button becomes invisible
-                if (opacity < 1 || visibility === 'hidden') {
-                    this.showButton();
-                }
-            }
-        }, 100); // Check every 100ms
-    }
-
     bindEvents() {
-        // More frequent scroll handler for better responsiveness
         const scrollHandler = Utils.throttle(() => {
             this.handleScroll();
-        }, 8); // Increased frequency
+        }, CONFIG.scroll.debounce);
 
         window.addEventListener('scroll', scrollHandler, { passive: true });
 
-        // Dynamic scroll button click with improved handling
         this.dynamicScrollButton.addEventListener('click', () => {
             this.handleDynamicScroll();
-        });
-
-        // Additional event listeners to maintain visibility
-        window.addEventListener('resize', () => {
-            this.showButton();
-        });
-
-        document.addEventListener('visibilitychange', () => {
-            if (!document.hidden) {
-                this.showButton();
-            }
         });
     }
 
     handleScroll() {
         const scrollTop = window.pageYOffset;
-
-        // Always ensure button is visible first
-        this.showButton();
         
-        // Dynamic scroll button logic
         this.updateDynamicScrollButton(scrollTop);
-        
-        // Force visibility after update
-        this.showButton();
     }
 
     updateDynamicScrollButton(scrollTop) {
         if (!this.dynamicScrollButton || !this.heroSection || !this.aboutSection) return;
 
-        // Get hero section end position
-        const heroHeight = this.heroSection.offsetHeight;
-        const heroEnd = heroHeight;
-        
-        // Get about section position  
         const aboutTop = this.aboutSection.offsetTop;
-
-        // Determine arrow direction:
-        // - Down arrow: when at top/hero section (before about section)
-        // - Up arrow: when at about section or below
         const shouldBeScrollUp = scrollTop >= (aboutTop - window.innerHeight / 3);
 
-        // Update arrow direction with smooth animation
         if (shouldBeScrollUp !== this.isScrollUp) {
             this.isScrollUp = shouldBeScrollUp;
             this.isScrolling = true;
             
-            // Ensure button is visible before animation
-            this.showButton();
-            
-            // Add smooth rotation animation with preserved visibility
             this.dynamicScrollButton.style.transform = 'scale(0.8)';
-            this.dynamicScrollButton.style.opacity = '1';
-            this.dynamicScrollButton.style.visibility = 'visible';
             
             setTimeout(() => {
                 this.dynamicScrollButton.classList.toggle('scroll-up', this.isScrollUp);
                 this.dynamicScrollButton.style.transform = 'scale(1)';
-                this.dynamicScrollButton.style.opacity = '1';
-                this.dynamicScrollButton.style.visibility = 'visible';
                 this.isScrolling = false;
-                
-                // Final visibility check
-                setTimeout(() => {
-                    this.showButton();
-                }, 50);
             }, 150);
         }
     }
@@ -873,22 +833,12 @@ class ScrollManager {
         const navHeight = document.getElementById('premiumNav')?.offsetHeight || 80;
         this.isScrolling = true;
 
-        // Always ensure button stays visible during entire process
-        this.showButton();
-
-        // Create a visibility maintenance interval during scroll
-        const maintainVisibility = setInterval(() => {
-            this.showButton();
-        }, 50);
-
         if (this.isScrollUp) {
-            // Scroll to hero section (top of page)
             window.scrollTo({
                 top: 0,
                 behavior: 'smooth'
             });
         } else {
-            // Scroll to about section
             const aboutTop = this.aboutSection.offsetTop - navHeight;
             window.scrollTo({
                 top: aboutTop,
@@ -896,44 +846,9 @@ class ScrollManager {
             });
         }
 
-        // Detect scroll completion and maintain visibility
-        let lastScrollTop = window.pageYOffset;
-        let scrollCheckCount = 0;
-        const maxChecks = 50; // Maximum 2.5 seconds
-
-        const checkScrollComplete = () => {
-            const currentScrollTop = window.pageYOffset;
-            
-            if (Math.abs(currentScrollTop - lastScrollTop) < 1 || scrollCheckCount >= maxChecks) {
-                // Scroll completed
-                clearInterval(maintainVisibility);
-                this.isScrolling = false;
-                this.showButton();
-                
-                // Additional visibility reinforcement
-                setTimeout(() => {
-                    this.showButton();
-                    this.handleScroll(); // Refresh state
-                }, 100);
-                
-                return;
-            }
-            
-            lastScrollTop = currentScrollTop;
-            scrollCheckCount++;
-            this.showButton(); // Ensure visibility during scroll
-            
-            setTimeout(checkScrollComplete, 50);
-        };
-
-        // Start monitoring scroll completion
-        setTimeout(checkScrollComplete, 100);
-    }
-
-    destroy() {
-        if (this.visibilityInterval) {
-            clearInterval(this.visibilityInterval);
-        }
+        setTimeout(() => {
+            this.isScrolling = false;
+        }, 1000);
     }
 }
 
